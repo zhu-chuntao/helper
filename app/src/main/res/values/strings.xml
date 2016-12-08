@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">tvhelper</string>
+    <string name="flow_day_down">本次开机下载: %1$s</string>
+    <string name="flow_day_up">本次开机上传: %1$s</string>
+    <string name="flow_all_down">累计下载: %1$s</string>
+    <string name="flow_all_up">累计上传: %1$s</string>
+</resources>

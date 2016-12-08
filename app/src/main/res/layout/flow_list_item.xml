@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/flow_item_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:background="@drawable/back_light"/>
+
+    <TextView
+        android:id="@+id/flow_item_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dip"
+        android:layout_toRightOf="@id/flow_item_icon"
+        android:text="jsjsjsj"
+        android:textColor="#666872" />
+
+    <TextView
+        android:id="@+id/flow_item_down"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="down"
+        android:layout_alignParentRight="true"
+        android:textColor="#666872" />
+</RelativeLayout>
