@@ -2,15 +2,24 @@ package com.wiitel.tvhelper.data;
 
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;
+import org.greenrobot.greendao.annotation.Index;
+import org.greenrobot.greendao.annotation.NotNull;
 import org.greenrobot.greendao.annotation.Transient;
 
 /**
  * Created by zhuchuntao on 16-12-8.
  */
-@Entity
+@Entity(
+        indexes = {
+                @Index(value = "appid,currentMonth")
+        }
+)
 public class AppFlow {
 
+    @NotNull
     private String currentMonth;
+
+    @NotNull
     private int appid;
 
     @Transient
@@ -69,8 +78,9 @@ public class AppFlow {
         this.rxHistory = rxHistory;
     }
 
-    @Generated(hash = 1104456906)
-    public AppFlow(String currentMonth, int appid, long rxHistory, long txHistory) {
+    @Generated(hash = 1028680205)
+    public AppFlow(@NotNull String currentMonth, int appid, long rxHistory,
+            long txHistory) {
         this.currentMonth = currentMonth;
         this.appid = appid;
         this.rxHistory = rxHistory;

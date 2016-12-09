@@ -73,6 +73,7 @@ public class MainActivity extends Activity {
 
 
     private void showClear() {
+        System.out.println("showClear");
         Fragment t=getFragmentManager().findFragmentById(R.id.main_fragment);
         if(t instanceof ClearFragment){
             return;

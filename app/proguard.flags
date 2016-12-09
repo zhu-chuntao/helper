@@ -1,0 +1,64 @@
+-keep class * extends android.app.Activity
+
+-dontwarn android.support.design.**
+-dontwarn com.letv.wallet.base.**
+-dontwarn in.srain.cube.views.ptr.**
+-dontwarn com.google.**
+
+
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+
+-keepattributes Exceptions,InnerClasses,Signature,Deprecated,*Annotation*,Synthetic,EnclosingMethod,SourceFile,LineNumberTable
+
+################### region for xUtils
+-keep public class org.xutils.** {
+    public protected *;
+}
+-keep public interface org.xutils.** {
+    public protected *;
+}
+-keepclassmembers class * extends org.xutils.** {
+    public protected *;
+}
+-keepclassmembers class * extends org.xutils.http.RequestParams {*;}
+-keepclassmembers class * {
+   void *(android.view.View);
+   *** *Click(...);
+   *** *Event(...);
+}
+#################### end region
+
+
+#################### android-Ultra-Pull-To-Refresh  start
+-keep class in.srain.**
+#################### android-Ultra-Pull-To-Refresh end
+
+
+#for wallet
+
+#不混淆自定义view以及view group
+-keepclasseswithmembernames class * {
+    public <init>(android.content.Context, android.util.AttributeSet);
+}
+
+-keepclasseswithmembernames class * {
+    public <init>(android.content.Context, android.util.AttributeSet, int);
+}
+
+
+
+
+#不混淆android　support包v4
+-dontwarn android.support.v4.**
+-keep class android.support.v4.** { *;}
+
+
+#不混淆android　support包v7
+-dontwarn android.support.v7.**
+-keep class android.support.v7.** { *; }
+
+-dontnote android.support.v7.**
+
+

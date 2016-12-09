@@ -41,10 +41,13 @@ public class AppFlowDao extends AbstractDao<AppFlow, Void> {
     public static void createTable(Database db, boolean ifNotExists) {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"APP_FLOW\" (" + //
-                "\"CURRENT_MONTH\" TEXT," + // 0: currentMonth
+                "\"CURRENT_MONTH\" TEXT NOT NULL ," + // 0: currentMonth
                 "\"APPID\" INTEGER NOT NULL ," + // 1: appid
                 "\"RX_HISTORY\" INTEGER NOT NULL ," + // 2: rxHistory
                 "\"TX_HISTORY\" INTEGER NOT NULL );"); // 3: txHistory
+        // Add Indexes
+        db.execSQL("CREATE INDEX " + constraint + "IDX_APP_FLOW_APPID_CURRENT_MONTH ON APP_FLOW" +
+                " (\"APPID\" ASC,\"CURRENT_MONTH\" ASC);");
     }
 
     /** Drops the underlying database table. */
@@ -56,11 +59,7 @@ public class AppFlowDao extends AbstractDao<AppFlow, Void> {
     @Override
     protected final void bindValues(DatabaseStatement stmt, AppFlow entity) {
         stmt.clearBindings();
- 
-        String currentMonth = entity.getCurrentMonth();
-        if (currentMonth != null) {
-            stmt.bindString(1, currentMonth);
-        }
+        stmt.bindString(1, entity.getCurrentMonth());
         stmt.bindLong(2, entity.getAppid());
         stmt.bindLong(3, entity.getRxHistory());
         stmt.bindLong(4, entity.getTxHistory());
@@ -69,11 +68,7 @@ public class AppFlowDao extends AbstractDao<AppFlow, Void> {
     @Override
     protected final void bindValues(SQLiteStatement stmt, AppFlow entity) {
         stmt.clearBindings();
- 
-        String currentMonth = entity.getCurrentMonth();
-        if (currentMonth != null) {
-            stmt.bindString(1, currentMonth);
-        }
+        stmt.bindString(1, entity.getCurrentMonth());
         stmt.bindLong(2, entity.getAppid());
         stmt.bindLong(3, entity.getRxHistory());
         stmt.bindLong(4, entity.getTxHistory());
@@ -87,7 +82,7 @@ public class AppFlowDao extends AbstractDao<AppFlow, Void> {
     @Override
     public AppFlow readEntity(Cursor cursor, int offset) {
         AppFlow entity = new AppFlow( //
-            cursor.isNull(offset + 0) ? null : cursor.getString(offset + 0), // currentMonth
+            cursor.getString(offset + 0), // currentMonth
             cursor.getInt(offset + 1), // appid
             cursor.getLong(offset + 2), // rxHistory
             cursor.getLong(offset + 3) // txHistory
@@ -97,7 +92,7 @@ public class AppFlowDao extends AbstractDao<AppFlow, Void> {
      
     @Override
     public void readEntity(Cursor cursor, AppFlow entity, int offset) {
-        entity.setCurrentMonth(cursor.isNull(offset + 0) ? null : cursor.getString(offset + 0));
+        entity.setCurrentMonth(cursor.getString(offset + 0));
         entity.setAppid(cursor.getInt(offset + 1));
         entity.setRxHistory(cursor.getLong(offset + 2));
         entity.setTxHistory(cursor.getLong(offset + 3));

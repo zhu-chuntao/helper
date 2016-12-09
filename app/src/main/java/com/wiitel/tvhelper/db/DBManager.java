@@ -72,7 +72,7 @@ public class DBManager {
         DaoMaster daoMaster = new DaoMaster(getWritableDatabase());
         DaoSession daoSession = daoMaster.newSession();
         AppFlowDao drugDao = daoSession.getAppFlowDao();
-        drugDao.insert(flow);
+        drugDao.insertOrReplace(flow);
     }
 
     /**

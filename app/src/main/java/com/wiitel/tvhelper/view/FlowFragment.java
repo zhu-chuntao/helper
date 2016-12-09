@@ -86,8 +86,14 @@ public class FlowFragment extends Fragment {
         flowAll.setAppid(1);
         flowAll.setRx(nowRx);
         flowAll.setTx(nowTx);
+        try {
+            flowAll.setCurrentMonth(TimePatternUtil.getDate(System.currentTimeMillis(), TimePatternUtil.TimePattern.YM));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
 
         flowAll = getAppFlow(flowAll);
+
 
         flowDayDown.setText(String.format(context.getText(R.string.flow_day_down).toString(),getMByte(flowAll.getRx())));
         flowDayUp.setText(String.format(context.getText(R.string.flow_day_up).toString(),getMByte(flowAll.getTx())));
@@ -117,6 +123,11 @@ public class FlowFragment extends Fragment {
                         int uId = info.applicationInfo.uid;
                         AppFlow flow = new AppFlow();
                         flow.setAppid(uId);
+                        try {
+                            flow.setCurrentMonth(TimePatternUtil.getDate(System.currentTimeMillis(), TimePatternUtil.TimePattern.YM));
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
                         //如果返回-1，代表不支持使用该方法，注意必须是2.2以上的
                         long rx = TrafficStats.getUidRxBytes(uId);
                         //如果返回-1，代表不支持使用该方法，注意必须是2.2以上的

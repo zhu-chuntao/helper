@@ -109,7 +109,7 @@ public class TimePatternUtil {
     public enum TimePattern {
 
         BASIC("yyyy-MM-dd HH-mm"),
-        YM("yyyy-MM");
+        YM("yyyyMM");
         private String pattern;
 
         String getPattern() {

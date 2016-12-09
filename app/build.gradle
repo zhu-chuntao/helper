@@ -14,10 +14,28 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
+    signingConfigs {
+        platform {
+            storeFile file('../sign/tvhelper.keystore')
+            storePassword 'tvhelper'
+            keyAlias 'wiiteltvhelper'
+            keyPassword 'tvhelper'
+        }
+
+    }
+
     buildTypes {
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard.flags'
+            signingConfig signingConfigs.platform
+        }
+
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.platform
         }
     }
     sourceSets{
@@ -51,4 +69,6 @@ dependencies {
     apt 'com.jakewharton:butterknife-compiler:8.2.1'
 
     compile 'org.greenrobot:greendao:3.0.1'
+
+    compile project(path: ':library')
 }

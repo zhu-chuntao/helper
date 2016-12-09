@@ -4,4 +4,6 @@
     <string name="flow_day_up">本次开机上传: %1$s</string>
     <string name="flow_all_down">累计下载: %1$s</string>
     <string name="flow_all_up">累计上传: %1$s</string>
+    <string name="clear_avail_memory">当前已使用百分比</string>
+    <string name="device_avail_memory">设备总内存的大小是：%1$d G</string>
 </resources>
