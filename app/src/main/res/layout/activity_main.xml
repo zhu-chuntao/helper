@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_margin="30dip"
     tools:context="com.wiitel.tvhelper.MainActivity">
 
     <LinearLayout
@@ -11,25 +12,28 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true">
 
-        <ImageButton
+        <Button
             android:id="@+id/main_clear"
             android:layout_width="match_parent"
             android:layout_weight="1"
+            android:text="@string/clear_name"
             android:layout_height="wrap_content" />
 
-        <ImageButton
+        <Button
             android:id="@+id/main_netspeed"
+            android:text="@string/speed_name"
             android:layout_width="match_parent"
             android:layout_weight="1"
             android:layout_height="wrap_content" />
 
-        <ImageButton
+        <Button
             android:id="@+id/main_flow"
             android:layout_width="match_parent"
             android:layout_weight="1"
+            android:text="@string/flow_name"
             android:layout_height="wrap_content" />
 
-        <ImageButton
+        <Button
             android:id="@+id/main_dns"
             android:layout_width="match_parent"
             android:layout_weight="1"

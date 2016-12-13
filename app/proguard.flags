@@ -1,4 +1,6 @@
 -keep class * extends android.app.Activity
+-keep class com.android.volley.** { *;}
+-keep class com.google.** { *;}
 
 -dontwarn android.support.design.**
 -dontwarn com.letv.wallet.base.**

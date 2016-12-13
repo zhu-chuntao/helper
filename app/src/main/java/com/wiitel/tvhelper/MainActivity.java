@@ -3,22 +3,14 @@ package com.wiitel.tvhelper;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.content.pm.IPackageDataObserver;
-import android.content.pm.IPackageStatsObserver;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageStats;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.RemoteException;
-import android.text.format.Formatter;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageButton;
-import android.widget.Toast;
+import android.widget.Button;
 
+import com.wiitel.tvhelper.http.LocalUpdateRequest;
+import com.wiitel.tvhelper.http.UpdateData;
 import com.wiitel.tvhelper.view.ClearFragment;
 import com.wiitel.tvhelper.view.DnsFragment;
 import com.wiitel.tvhelper.view.FlowFragment;
@@ -27,23 +19,21 @@ import com.wiitel.tvhelper.view.NetSpeedFragment;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Method;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements LocalUpdateRequest.UpdateListListener {
 
     @BindView(R.id.main_clear)
-    ImageButton mainClear;
+    Button mainClear;
     @BindView(R.id.main_netspeed)
-    ImageButton mainNetspeed;
+    Button mainNetspeed;
     @BindView(R.id.main_flow)
-    ImageButton mainFlow;
+    Button mainFlow;
     @BindView(R.id.main_dns)
-    ImageButton mainDns;
+    Button mainDns;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +49,9 @@ public class MainActivity extends Activity {
         //fl为占位布局
         ft.add(R.id.main_fragment, f1);
         ft.commit();
+        LocalUpdateRequest request = new LocalUpdateRequest(this);
+        request.setListener(this);
+        request.serverRequestData(null);
     }
 
 
@@ -155,5 +148,20 @@ public class MainActivity extends Activity {
         //ret = do_command(con);
         System.out.println("==========================ret:" + ret);
         return ret;
+    }
+
+    @Override
+    public void success(UpdateData data) {
+
+    }
+
+    @Override
+    public void start(String tag, String msg) {
+
+    }
+
+    @Override
+    public void error(String tag, String msg) {
+
     }
 }

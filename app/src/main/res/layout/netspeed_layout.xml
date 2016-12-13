@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg"
     android:orientation="vertical"
     tools:context="com.wiitel.tvhelper.MainActivity">
 
@@ -51,6 +50,7 @@
             android:id="@+id/netspeed_restart"
             android:layout_gravity="center_horizontal|bottom"
             android:layout_marginBottom="50dip"
+            android:text="@string/speed_start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>

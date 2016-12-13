@@ -28,8 +28,8 @@
 
         <com.wiitel.library.ColorArcProgressBar
             android:id="@+id/clear_progress"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
+            android:layout_width="100dip"
+            android:layout_height="100dip"
             android:layout_gravity="center_horizontal"
             app:back_color="@android:color/darker_gray"
             app:back_width="2dp"
@@ -56,12 +56,14 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="请加速"
+                android:text="@string/clear_hint"
                 android:textSize="16sp" />
 
             <Button
                 android:id="@+id/clear_execute"
+                android:layout_marginTop="10dip"
                 android:layout_width="wrap_content"
+                android:text="@string/clear_start"
                 android:layout_height="wrap_content" />
         </LinearLayout>
     </LinearLayout>

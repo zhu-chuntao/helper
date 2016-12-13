@@ -31,7 +31,7 @@ public class NetSpeedFragment extends Fragment {
 
 
     private static final String TAG = NetSpeedFragment.class.getName();
-    private static final int MAX_COUNT = 5;
+    private static final int MAX_COUNT = 10;
 
     @BindView(R.id.netspeed_value)
     TextView netspeedValue;
@@ -74,6 +74,7 @@ public class NetSpeedFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        netspeedRestart.requestFocus();
         mHandler = new MyHandler(getActivity().getMainLooper());
         lastTotalRxBytes = getTotalRxBytes();
         lastTimeStamp = System.currentTimeMillis();

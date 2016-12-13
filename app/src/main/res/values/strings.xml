@@ -1,8 +1,11 @@
 <resources>
     <string name="app_name">tvhelper</string>
     <string name="clear_name">内存清理</string>
+    <string name="clear_hint">请清理你的内存：</string>
+    <string name="clear_start">开始清理</string>
     <string name="flow_name">流量监控</string>
     <string name="speed_name">网速监控</string>
+    <string name="speed_start">重新开始网速测试</string>
     <string name="flow_day_down">本次开机下载: %1$s</string>
     <string name="flow_day_up">本次开机上传: %1$s</string>
     <string name="flow_all_down">累计下载: %1$s</string>
