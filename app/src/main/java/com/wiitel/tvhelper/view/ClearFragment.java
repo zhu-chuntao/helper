@@ -13,8 +13,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.StatFs;
-import android.text.format.Formatter;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,7 +65,7 @@ public class ClearFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setData();
-        clearProgress.setUnit(String.format(context.getResources().getString(R.string.device_avail_memory), getTotalMemory() / 1024 / 1024 / 1024));
+        clearProgress.setUnit(String.format(context.getResources().getString(R.string.device_avail_memory), getTotalMemory() / 1024 / 1024));
         clearExecute.requestFocus();
         //android_command();
     }
@@ -121,9 +119,11 @@ public class ClearFragment extends Fragment {
             FileReader fr = new FileReader(dir);
             BufferedReader br = new BufferedReader(fr, 2048);
             String memoryLine = br.readLine();
-            String subMemoryLine = memoryLine.substring(memoryLine.indexOf("MemTotal:"));
+
+            String[] arrayOfString = memoryLine.split("\\s+");
+
             br.close();
-            return Integer.parseInt(subMemoryLine.replaceAll("\\D+", "")) * 1024l;
+            return Integer.parseInt(arrayOfString[1]) * 1024l;
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -52,6 +52,7 @@ public class MainActivity extends Activity implements LocalUpdateRequest.UpdateL
         LocalUpdateRequest request = new LocalUpdateRequest(this);
         request.setListener(this);
         request.serverRequestData(null);
+       
     }
 
 
