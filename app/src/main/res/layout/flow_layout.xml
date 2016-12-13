@@ -13,11 +13,12 @@
         android:orientation="horizontal">
 
         <Button
+            android:id="@+id/flow_save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@null"
             android:drawableLeft="@drawable/back_light"
-            android:text="流量监控" />
+            android:text="@string/flow_name" />
     </LinearLayout>
 
 

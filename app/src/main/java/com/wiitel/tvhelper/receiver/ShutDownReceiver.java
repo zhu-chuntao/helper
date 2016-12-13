@@ -47,27 +47,23 @@ public class ShutDownReceiver extends BroadcastReceiver {
         protected String doInBackground(String... params) {
             //接收总量
             long nowRx = TrafficStats.getTotalRxBytes();
-
             //发送总量
             long nowTx = TrafficStats.getTotalTxBytes();
-
-
             AppFlow flowAll = new AppFlow();
             flowAll.setAppid(1);
             flowAll.setRx(nowRx);
             flowAll.setTx(nowTx);
-
-            if(setAppFlowAll(flowAll)){
+            if (setAppFlowAll(flowAll)) {
                 //update
                 DBManager.getInstance(context).updateFlow(flowAll);
-            }else{
+            } else {
                 //insert
                 DBManager.getInstance(context).insertFlow(flowAll);
             }
 
             PackageManager pm = context.getPackageManager();
             List<PackageInfo> pinfos = pm.getInstalledPackages
-                    (PackageManager.MATCH_UNINSTALLED_PACKAGES | PackageManager.GET_PERMISSIONS);
+                    (PackageManager.GET_UNINSTALLED_PACKAGES | PackageManager.GET_PERMISSIONS);
 
             for (PackageInfo info : pinfos) {
                 //请求每个程序包对应的androidManifest.xml里面的权限
@@ -90,10 +86,10 @@ public class ShutDownReceiver extends BroadcastReceiver {
                             flow.setRx(rx);
                             flow.setTx(tx);
 
-                            if(setAppFlowAll(flow)){
+                            if (setAppFlowAll(flow)) {
                                 //update
                                 DBManager.getInstance(context).updateFlow(flow);
-                            }else{
+                            } else {
                                 //insert
                                 DBManager.getInstance(context).insertFlow(flow);
                             }
@@ -116,6 +112,7 @@ public class ShutDownReceiver extends BroadcastReceiver {
 
         }
     }
+
     //设置历史的流量
     private boolean setAppFlowAll(AppFlow flow) {
         DBManager dbManager = DBManager.getInstance(context);
@@ -123,10 +120,10 @@ public class ShutDownReceiver extends BroadcastReceiver {
             flow.setCurrentMonth(TimePatternUtil.getDate(System.currentTimeMillis(), TimePatternUtil.TimePattern.YM));
             AppFlow dbFlow = dbManager.queryFlowList(TimePatternUtil.getDate(System.currentTimeMillis(), TimePatternUtil.TimePattern.YM), flow.getAppid());
             if (dbFlow != null) {
-                flow.setRxHistory(dbFlow.getRxHistory()+flow.getRx());
-                flow.setTxHistory(dbFlow.getTxHistory()+flow.getTx());
+                flow.setRxHistory(dbFlow.getRxHistory() + flow.getRx());
+                flow.setTxHistory(dbFlow.getTxHistory() + flow.getTx());
                 return true;
-            }else{
+            } else {
                 return false;
             }
         } catch (ParseException e) {
@@ -134,8 +131,6 @@ public class ShutDownReceiver extends BroadcastReceiver {
         }
         return false;
     }
-
-
 
 
 }

@@ -6,6 +6,7 @@
     android:background="@drawable/bg"
     android:orientation="vertical"
     tools:context="com.wiitel.tvhelper.MainActivity">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -16,12 +17,42 @@
             android:layout_height="wrap_content"
             android:background="@null"
             android:drawableLeft="@drawable/back_light"
-            android:text="网速监控" />
+            android:text="@string/speed_name" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/netspeed_value"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="netspeed" />
+        android:layout_marginTop="10dip"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textSize="20sp"
+            android:text="@string/speed_hint_message" />
+
+        <TextView
+            android:id="@+id/netspeed_value"
+            android:textSize="16sp"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/netspeed_final_value"
+            android:textSize="18sp"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"></TextView>
+
+        <Button
+            android:id="@+id/netspeed_restart"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginBottom="50dip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
 </LinearLayout>

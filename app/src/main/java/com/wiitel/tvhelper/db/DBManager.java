@@ -8,6 +8,7 @@ import com.wiitel.tvhelper.data.AppFlowDao;
 import com.wiitel.tvhelper.data.DaoMaster;
 import com.wiitel.tvhelper.data.DaoSession;
 
+import org.greenrobot.greendao.query.DeleteQuery;
 import org.greenrobot.greendao.query.QueryBuilder;
 
 import java.util.List;
@@ -100,6 +101,16 @@ public class DBManager {
         AppFlowDao flowDao = daoSession.getAppFlowDao();
         flowDao.update(flow);
     }
+
+    public void deleteFlow(String currentMonth){
+        DaoMaster daoMaster = new DaoMaster(getWritableDatabase());
+        DaoSession daoSession = daoMaster.newSession();
+        AppFlowDao drugDao = daoSession.getAppFlowDao();
+        DeleteQuery<AppFlow> qb=drugDao.queryBuilder().where(AppFlowDao.Properties.CurrentMonth.le(currentMonth)).buildDelete();
+        qb.executeDeleteWithoutDetachingEntities();
+    }
+
+
 
     public void executeSql(){
         //String sql = “select * from "+ xxxDao;

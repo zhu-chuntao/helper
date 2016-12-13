@@ -4,46 +4,66 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     tools:context="com.wiitel.tvhelper.MainActivity">
 
-
-    <com.wiitel.library.ColorArcProgressBar
-        android:id="@+id/clear_progress"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_gravity="center_horizontal"
-        app:back_color="@android:color/darker_gray"
-        app:back_width="2dp"
-        app:front_color1="#00ff00"
-        app:front_color2="#ffff00"
-        app:front_color3="#ff0000"
-        app:front_width="10dp"
-        app:is_need_content="true"
-        app:is_need_dial="true"
-        app:is_need_title="true"
-        app:is_need_unit="true"
-        app:max_value="100"
-        app:string_title="@string/clear_avail_memory"
-        app:string_unit="M"
-        app:total_engle="270" />
-
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="100dip"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="请加速" />
+        android:orientation="horizontal">
 
         <Button
-            android:id="@+id/clear_execute"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:drawableLeft="@drawable/back_light"
+            android:text="@string/clear_name" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <com.wiitel.library.ColorArcProgressBar
+            android:id="@+id/clear_progress"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center_horizontal"
+            app:back_color="@android:color/darker_gray"
+            app:back_width="2dp"
+            app:front_color1="#00ff00"
+            app:front_color2="#ffff00"
+            app:front_color3="#ff0000"
+            app:front_width="10dp"
+            app:is_need_content="true"
+            app:is_need_dial="true"
+            app:is_need_title="true"
+            app:is_need_unit="true"
+            app:max_value="100"
+            app:string_title="@string/clear_avail_memory"
+            app:string_unit="M"
+            app:total_engle="270" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="100dip"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="请加速"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/clear_execute"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
     </LinearLayout>
 
 

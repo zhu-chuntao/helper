@@ -10,15 +10,18 @@ import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.wiitel.tvhelper.R;
+import com.wiitel.tvhelper.download.AppUpdateAsync;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Created by zhuchuntao on 16-12-8.
@@ -28,8 +31,14 @@ public class NetSpeedFragment extends Fragment {
 
 
     private static final String TAG = NetSpeedFragment.class.getName();
+    private static final int MAX_COUNT = 5;
+
     @BindView(R.id.netspeed_value)
     TextView netspeedValue;
+    @BindView(R.id.netspeed_final_value)
+    TextView netspeedFinalValue;
+    @BindView(R.id.netspeed_restart)
+    Button netspeedRestart;
 
 
     private MyHandler mHandler;
@@ -37,23 +46,26 @@ public class NetSpeedFragment extends Fragment {
     private long lastTotalRxBytes = 0;
     private long lastTimeStamp = 0;
     private Timer time;
+    private Context context;
 
+    private String url = "http://live.wiitelott.com/test.test";
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        System.out.println(TAG + "onAttach");
-    }
+    private int speedCount;
+
+    private String resultBuffer;
+    private MyTask task;
+
+    private long finalSpeed = 0;
+    private AppUpdateAsync downloadTask;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        System.out.println(TAG + "onCreate");
+        this.context = getActivity();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        System.out.println(TAG + "onCreateView");
         View view = inflater.inflate(R.layout.netspeed_layout, null);
         ButterKnife.bind(this, view);
         return view;
@@ -62,35 +74,55 @@ public class NetSpeedFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        System.out.println(TAG + "onActivityCreated");
         mHandler = new MyHandler(getActivity().getMainLooper());
         lastTotalRxBytes = getTotalRxBytes();
         lastTimeStamp = System.currentTimeMillis();
-        time = new Timer();
-        time.schedule(task, 1000, 2000);
+
+        downloadTask= new AppUpdateAsync(context, false, true, null);
+        downloadTask.execute(url);
+
+        start();
     }
 
-    TimerTask task = new TimerTask() {
+    private void start() {
+        resultBuffer = "";
+        speedCount = 0;
+        finalSpeed = 0;
+        time = new Timer();
+        task = new MyTask();
+        time.schedule(task, 1000, 1000);
+    }
+
+
+    private class MyTask extends TimerTask {
+
         @Override
         public void run() {
             showNetSpeed();
         }
-    };
+    }
 
     private void showNetSpeed() {
 
-        long nowTotalRxBytes = getTotalRxBytes();
-        long nowTimeStamp = System.currentTimeMillis();
-        long speed = ((nowTotalRxBytes - lastTotalRxBytes) * 1000 / (nowTimeStamp - lastTimeStamp));//毫秒转换
+        if (speedCount >= MAX_COUNT) {
+            time.cancel();
+            time = null;
+        } else {
+            long nowTotalRxBytes = getTotalRxBytes();
+            long nowTimeStamp = System.currentTimeMillis();
+            long speed = ((nowTotalRxBytes - lastTotalRxBytes) * 1000 / (nowTimeStamp - lastTimeStamp));//毫秒转换
 
-        lastTimeStamp = nowTimeStamp;
-        lastTotalRxBytes = nowTotalRxBytes;
+            lastTimeStamp = nowTimeStamp;
+            lastTotalRxBytes = nowTotalRxBytes;
 
-        Message msg = mHandler.obtainMessage();
-        msg.what = 100;
-        msg.obj = String.valueOf(speed) + " kb/s";
-
-        mHandler.sendMessage(msg);//更新界面
+            Message msg = mHandler.obtainMessage();
+            msg.what = 100;
+            finalSpeed = finalSpeed + speed;
+            resultBuffer = resultBuffer + String.format(context.getResources().getString(R.string.speed_test_message), speedCount + 1, String.valueOf(speed)) + "\n";
+            msg.obj = resultBuffer;
+            mHandler.sendMessage(msg);//更新界面
+            speedCount++;
+        }
     }
 
 
@@ -101,6 +133,15 @@ public class NetSpeedFragment extends Fragment {
             return 0;
         }
 
+    }
+
+    @OnClick(R.id.netspeed_restart)
+    public void onClick() {
+        if (null != time) {
+            time.cancel();
+            time = null;
+        }
+        start();
     }
 
 
@@ -116,6 +157,7 @@ public class NetSpeedFragment extends Fragment {
             super.handleMessage(msg);
             // 此处可以更新UI
             netspeedValue.setText(msg.obj + "");
+            netspeedFinalValue.setText(String.format(context.getString(R.string.speed_final_message), String.valueOf(finalSpeed / (speedCount + 1))));
         }
     }
 
@@ -123,44 +165,42 @@ public class NetSpeedFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        System.out.println(TAG + "onStart");
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        System.out.println(TAG + "onResume");
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        System.out.println(TAG + "onPause");
-        time.cancel();
+        if (null != time) {
+            time.cancel();
+            time = null;
+        }
+        downloadTask.stopDownload(true);
+
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        System.out.println(TAG + "onStop");
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        System.out.println(TAG + "onDestroyView");
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        System.out.println(TAG + "onDetach");
     }
 
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        System.out.println(TAG + "onDestroy");
     }
 }

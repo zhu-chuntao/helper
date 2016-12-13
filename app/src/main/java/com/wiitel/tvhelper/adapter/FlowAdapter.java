@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.wiitel.tvhelper.R;
 import com.wiitel.tvhelper.data.AppInfo;
+import com.wiitel.tvhelper.util.FlowUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +64,7 @@ public class FlowAdapter extends BaseAdapter {
         //绑定数据
         zujian.icon.setBackgroundDrawable(appInfoList.get(position).getIcon());
         zujian.name.setText(appInfoList.get(position).getLabel());
-        zujian.down.setText(appInfoList.get(position).getFlow().getRxAll()+"kb");
+        zujian.down.setText(FlowUtil.calculateFlow(appInfoList.get(position).getFlow().getRxAll()));
         return convertView;
     }
 

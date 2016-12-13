@@ -13,7 +13,7 @@ import org.greenrobot.greendao.database.DatabaseStatement;
 /** 
  * DAO for table "APP_FLOW".
 */
-public class AppFlowDao extends AbstractDao<AppFlow, Void> {
+public class AppFlowDao extends AbstractDao<AppFlow, Long> {
 
     public static final String TABLENAME = "APP_FLOW";
 
@@ -22,10 +22,11 @@ public class AppFlowDao extends AbstractDao<AppFlow, Void> {
      * Can be used for QueryBuilder and for referencing column names.
     */
     public static class Properties {
-        public final static Property CurrentMonth = new Property(0, String.class, "currentMonth", false, "CURRENT_MONTH");
-        public final static Property Appid = new Property(1, int.class, "appid", false, "APPID");
-        public final static Property RxHistory = new Property(2, long.class, "rxHistory", false, "RX_HISTORY");
-        public final static Property TxHistory = new Property(3, long.class, "txHistory", false, "TX_HISTORY");
+        public final static Property Key = new Property(0, long.class, "key", true, "_id");
+        public final static Property CurrentMonth = new Property(1, String.class, "currentMonth", false, "CURRENT_MONTH");
+        public final static Property Appid = new Property(2, int.class, "appid", false, "APPID");
+        public final static Property RxHistory = new Property(3, long.class, "rxHistory", false, "RX_HISTORY");
+        public final static Property TxHistory = new Property(4, long.class, "txHistory", false, "TX_HISTORY");
     };
 
 
@@ -41,10 +42,11 @@ public class AppFlowDao extends AbstractDao<AppFlow, Void> {
     public static void createTable(Database db, boolean ifNotExists) {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"APP_FLOW\" (" + //
-                "\"CURRENT_MONTH\" TEXT NOT NULL ," + // 0: currentMonth
-                "\"APPID\" INTEGER NOT NULL ," + // 1: appid
-                "\"RX_HISTORY\" INTEGER NOT NULL ," + // 2: rxHistory
-                "\"TX_HISTORY\" INTEGER NOT NULL );"); // 3: txHistory
+                "\"_id\" INTEGER PRIMARY KEY NOT NULL ," + // 0: key
+                "\"CURRENT_MONTH\" TEXT NOT NULL ," + // 1: currentMonth
+                "\"APPID\" INTEGER NOT NULL ," + // 2: appid
+                "\"RX_HISTORY\" INTEGER NOT NULL ," + // 3: rxHistory
+                "\"TX_HISTORY\" INTEGER NOT NULL );"); // 4: txHistory
         // Add Indexes
         db.execSQL("CREATE INDEX " + constraint + "IDX_APP_FLOW_APPID_CURRENT_MONTH ON APP_FLOW" +
                 " (\"APPID\" ASC,\"CURRENT_MONTH\" ASC);");
@@ -59,54 +61,62 @@ public class AppFlowDao extends AbstractDao<AppFlow, Void> {
     @Override
     protected final void bindValues(DatabaseStatement stmt, AppFlow entity) {
         stmt.clearBindings();
-        stmt.bindString(1, entity.getCurrentMonth());
-        stmt.bindLong(2, entity.getAppid());
-        stmt.bindLong(3, entity.getRxHistory());
-        stmt.bindLong(4, entity.getTxHistory());
+        stmt.bindLong(1, entity.getKey());
+        stmt.bindString(2, entity.getCurrentMonth());
+        stmt.bindLong(3, entity.getAppid());
+        stmt.bindLong(4, entity.getRxHistory());
+        stmt.bindLong(5, entity.getTxHistory());
     }
 
     @Override
     protected final void bindValues(SQLiteStatement stmt, AppFlow entity) {
         stmt.clearBindings();
-        stmt.bindString(1, entity.getCurrentMonth());
-        stmt.bindLong(2, entity.getAppid());
-        stmt.bindLong(3, entity.getRxHistory());
-        stmt.bindLong(4, entity.getTxHistory());
+        stmt.bindLong(1, entity.getKey());
+        stmt.bindString(2, entity.getCurrentMonth());
+        stmt.bindLong(3, entity.getAppid());
+        stmt.bindLong(4, entity.getRxHistory());
+        stmt.bindLong(5, entity.getTxHistory());
     }
 
     @Override
-    public Void readKey(Cursor cursor, int offset) {
-        return null;
+    public Long readKey(Cursor cursor, int offset) {
+        return cursor.getLong(offset + 0);
     }    
 
     @Override
     public AppFlow readEntity(Cursor cursor, int offset) {
         AppFlow entity = new AppFlow( //
-            cursor.getString(offset + 0), // currentMonth
-            cursor.getInt(offset + 1), // appid
-            cursor.getLong(offset + 2), // rxHistory
-            cursor.getLong(offset + 3) // txHistory
+            cursor.getLong(offset + 0), // key
+            cursor.getString(offset + 1), // currentMonth
+            cursor.getInt(offset + 2), // appid
+            cursor.getLong(offset + 3), // rxHistory
+            cursor.getLong(offset + 4) // txHistory
         );
         return entity;
     }
      
     @Override
     public void readEntity(Cursor cursor, AppFlow entity, int offset) {
-        entity.setCurrentMonth(cursor.getString(offset + 0));
-        entity.setAppid(cursor.getInt(offset + 1));
-        entity.setRxHistory(cursor.getLong(offset + 2));
-        entity.setTxHistory(cursor.getLong(offset + 3));
+        entity.setKey(cursor.getLong(offset + 0));
+        entity.setCurrentMonth(cursor.getString(offset + 1));
+        entity.setAppid(cursor.getInt(offset + 2));
+        entity.setRxHistory(cursor.getLong(offset + 3));
+        entity.setTxHistory(cursor.getLong(offset + 4));
      }
     
     @Override
-    protected final Void updateKeyAfterInsert(AppFlow entity, long rowId) {
-        // Unsupported or missing PK type
-        return null;
+    protected final Long updateKeyAfterInsert(AppFlow entity, long rowId) {
+        entity.setKey(rowId);
+        return rowId;
     }
     
     @Override
-    public Void getKey(AppFlow entity) {
-        return null;
+    public Long getKey(AppFlow entity) {
+        if(entity != null) {
+            return entity.getKey();
+        } else {
+            return null;
+        }
     }
 
     @Override

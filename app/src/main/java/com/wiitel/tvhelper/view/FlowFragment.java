@@ -17,14 +17,18 @@ import com.wiitel.tvhelper.adapter.FlowAdapter;
 import com.wiitel.tvhelper.data.AppFlow;
 import com.wiitel.tvhelper.data.AppInfo;
 import com.wiitel.tvhelper.db.DBManager;
+import com.wiitel.tvhelper.util.FlowUtil;
 import com.wiitel.tvhelper.util.TimePatternUtil;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Created by zhuchuntao on 16-12-8.
@@ -50,21 +54,13 @@ public class FlowFragment extends Fragment {
     private List<AppInfo> appInfoList;
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        this.context = context;
-        System.out.println(TAG + "onAttach");
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        System.out.println(TAG + "onCreate");
+        this.context = getActivity();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        System.out.println(TAG + "onCreateView");
         View view = inflater.inflate(R.layout.flow_layout, null);
         ButterKnife.bind(this, view);
         return view;
@@ -74,13 +70,13 @@ public class FlowFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        //删除3个月以前的数据
+        DBManager.getInstance(context).deleteFlow(TimePatternUtil.getLastMonth(3));
 
         //接收总量
         long nowRx = TrafficStats.getTotalRxBytes();
-
         //发送总量
         long nowTx = TrafficStats.getTotalTxBytes();
-
 
         AppFlow flowAll = new AppFlow();
         flowAll.setAppid(1);
@@ -95,18 +91,16 @@ public class FlowFragment extends Fragment {
         flowAll = getAppFlow(flowAll);
 
 
-        flowDayDown.setText(String.format(context.getText(R.string.flow_day_down).toString(),getMByte(flowAll.getRx())));
-        flowDayUp.setText(String.format(context.getText(R.string.flow_day_up).toString(),getMByte(flowAll.getTx())));
-        flowAllDown.setText(String.format(context.getText(R.string.flow_all_down).toString(),getMByte(flowAll.getRxAll())));
-        flowAllUp.setText(String.format(context.getText(R.string.flow_all_down).toString(),getMByte(flowAll.getTxAll())));
-
+        flowDayDown.setText(String.format(context.getText(R.string.flow_day_down).toString(), FlowUtil.calculateFlow(flowAll.getRx())));
+        flowDayUp.setText(String.format(context.getText(R.string.flow_day_up).toString(), FlowUtil.calculateFlow(flowAll.getTx())));
+        flowAllDown.setText(String.format(context.getText(R.string.flow_all_down).toString(), FlowUtil.calculateFlow(flowAll.getRxAll())));
+        flowAllUp.setText(String.format(context.getText(R.string.flow_all_up).toString(), FlowUtil.calculateFlow(flowAll.getTxAll())));
 
 
         PackageManager pm = getActivity().getPackageManager();
         List<PackageInfo> pinfos = pm.getInstalledPackages
-                (PackageManager.MATCH_UNINSTALLED_PACKAGES | PackageManager.GET_PERMISSIONS);
+                (PackageManager.GET_UNINSTALLED_PACKAGES | PackageManager.GET_PERMISSIONS);
 
-        System.out.println(TAG + "onActivityCreated==" + nowTx + ";" + pinfos.size());
         appInfoList = new ArrayList<>();
         for (PackageInfo info : pinfos) {
             //请求每个程序包对应的androidManifest.xml里面的权限
@@ -132,6 +126,7 @@ public class FlowFragment extends Fragment {
                         long rx = TrafficStats.getUidRxBytes(uId);
                         //如果返回-1，代表不支持使用该方法，注意必须是2.2以上的
                         long tx = TrafficStats.getUidTxBytes(uId);
+                        //System.out.println("uId==="+uId+"rx====="+rx+";tx=="+tx);
                         //设置开机后的流量
                         flow.setRx(rx);
                         flow.setTx(tx);
@@ -145,14 +140,57 @@ public class FlowFragment extends Fragment {
                 }
             }
         }
-
-        FlowAdapter adapter = new FlowAdapter(context,appInfoList);
+        Collections.sort(appInfoList, new SortRx());
+        FlowAdapter adapter = new FlowAdapter(context, appInfoList);
         flowAppList.setAdapter(adapter);
 
     }
 
-    private String getMByte(long byteNumber){
-            return byteNumber/1024+"Kb";
+    /**
+     * 针对流量进行排序
+     */
+    class SortRx implements Comparator<AppInfo> {
+        public int compare(AppInfo r1, AppInfo r2) {
+            if (r1.getFlow().getRxAll() > r2.getFlow().getRxAll()) {
+                return -1;
+            } else if (r1.getFlow().getRxAll() < r2.getFlow().getRxAll())
+                return 1;
+            else {
+                return 0;
+            }
+
+        }
+    }
+
+    @OnClick(R.id.flow_save)
+    public void onClick() {
+        //接收总量
+        long nowRx = TrafficStats.getTotalRxBytes();
+
+        //发送总量
+        long nowTx = TrafficStats.getTotalTxBytes();
+
+        AppFlow flowAll = new AppFlow();
+        flowAll.setAppid(1);
+        flowAll.setRx(nowRx);
+        flowAll.setTx(nowTx);
+        try {
+            flowAll.setCurrentMonth(TimePatternUtil.getDate(System.currentTimeMillis(), TimePatternUtil.TimePattern.YM));
+            flowAll = getAppFlow(flowAll);
+            flowAll.setRxHistory(100);
+            flowAll.setTxHistory(99);
+            DBManager.getInstance(context).insertFlow(flowAll);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("id=" + flowAll.getAppid() + ";" + flowAll.getCurrentMonth() + "---------------" + e.getMessage());
+        }
+
+
+    }
+
+    private String getMByte(long byteNumber) {
+        return byteNumber / 1024 + "Kb";
     }
 
     //设置历史的流量
@@ -174,43 +212,38 @@ public class FlowFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        System.out.println(TAG + "onStart");
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        System.out.println(TAG + "onResume");
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        System.out.println(TAG + "onPause");
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        System.out.println(TAG + "onStop");
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        System.out.println(TAG + "onDestroyView");
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        System.out.println(TAG + "onDetach");
     }
 
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        System.out.println(TAG + "onDestroy");
     }
+
+
 }

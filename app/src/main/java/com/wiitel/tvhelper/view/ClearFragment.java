@@ -3,20 +3,33 @@ package com.wiitel.tvhelper.view;
 import android.app.ActivityManager;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.pm.IPackageDataObserver;
+import android.content.pm.IPackageStatsObserver;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageStats;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.RemoteException;
+import android.os.StatFs;
+import android.text.format.Formatter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.wiitel.library.ColorArcProgressBar;
 import com.wiitel.tvhelper.R;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import butterknife.BindView;
@@ -32,25 +45,19 @@ public class ClearFragment extends Fragment {
     private static final String TAG = ClearFragment.class.getName();
     @BindView(R.id.clear_progress)
     ColorArcProgressBar clearProgress;
+    @BindView(R.id.clear_execute)
+    Button clearExecute;
 
     private Context context;
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        this.context = context;
-        System.out.println(TAG + "onAttach");
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        System.out.println(TAG + "onCreate");
+        this.context = getActivity();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        System.out.println(TAG + "onCreateView");
         View view = inflater.inflate(R.layout.clear_layout, null);
         ButterKnife.bind(this, view);
         return view;
@@ -59,9 +66,10 @@ public class ClearFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        System.out.println(TAG + "onActivityCreated");
         setData();
         clearProgress.setUnit(String.format(context.getResources().getString(R.string.device_avail_memory), getTotalMemory() / 1024 / 1024 / 1024));
+        clearExecute.requestFocus();
+        //android_command();
     }
 
     private void setData() {
@@ -72,43 +80,41 @@ public class ClearFragment extends Fragment {
     @OnClick(R.id.clear_execute)
     public void onClick() {
         clear();
+        cleanAll();
+        setData();
     }
 
+    /**
+     * 杀进程
+     */
     private void clear() {
         clearProgress.setCurrentValues(getPercent());
-        //To change body of implemented methods use File | Settings | File Templates.
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         PackageManager pm = getActivity().getPackageManager();
         List<PackageInfo> pinfos = pm.getInstalledPackages
-                (PackageManager.MATCH_UNINSTALLED_PACKAGES | PackageManager.GET_PERMISSIONS);
+                (PackageManager.GET_UNINSTALLED_PACKAGES | PackageManager.GET_PERMISSIONS);
         for (PackageInfo info : pinfos) {
             if (!info.applicationInfo.processName.equals("com.wiitel.tvhelper")) {
                 am.killBackgroundProcesses(info.applicationInfo.processName);
                 setData();
             }
         }
-
-
     }
 
     //获取已经使用内存的百分比
     private int getPercent() {
-        System.out.println("getAvailMemory() ==" + getAvailMemory() + ";getTotalMemory()==" + getTotalMemory() + ";getProcessCpuRate()==" + getProcessCpuRate());
         return 100 - (int) (getAvailMemory() * 100 / getTotalMemory());
     }
 
     //获取可用内存大小
     private long getAvailMemory() {
-        // 获取android当前可用内存大小
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
         am.getMemoryInfo(mi);
-        //mi.availMem; 当前系统的可用内存
-        //return Formatter.formatFileSize(context, mi.availMem);// 将获取的内存大小规格化
-        System.out.println("可用内存---->>>" + mi.availMem / (1024 * 1024));
         return mi.availMem;
     }
 
+    //获取设备总内存
     public static long getTotalMemory() {
         String dir = "/proc/meminfo";
         try {
@@ -123,6 +129,7 @@ public class ClearFragment extends Fragment {
         }
         return 0;
     }
+
 
     /**
      * get CPU rate
@@ -162,47 +169,161 @@ public class ClearFragment extends Fragment {
         return rate;
     }
 
+
+    //缓存相关的业务
+    private PackageManager pm;
+
+    private long cacheS;
+
+    Handler mHadler = new Handler();
+
+
+    class MyPackageStateObserver extends IPackageStatsObserver.Stub {
+
+        @Override
+        public void onGetStatsCompleted(PackageStats pStats, boolean succeeded) throws RemoteException {
+
+            String packageName = pStats.packageName;
+            long cacheSize = pStats.cacheSize;
+            long codeSize = pStats.codeSize;
+            long dataSize = pStats.dataSize;
+            cacheS += cacheSize;
+//            sb.delete(0, sb.length());
+            System.out.println("onGetStatsCompleted======packageName==" + packageName);
+
+            //===到这里，数据准备完成
+            mHadler.post(new Runnable() {
+                @Override
+                public void run() {
+                }
+            });
+
+        }
+    }
+
+
+    class ClearCacheObj extends IPackageDataObserver.Stub {
+
+        @Override
+        public void onRemoveCompleted(String packageName, final boolean succeeded) throws RemoteException {
+            mHadler.post(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("ClearCacheObj onRemoveCompleted");
+                    Toast.makeText(context, "清楚状态： " + succeeded, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+    /**
+     * 清理全部应用程序缓存
+     *
+     */
+    public void cleanAll() {
+        //freeStorageAndNotify
+//        Method[] methods = PackageManager.class.getMethods();
+//        for (Method method : methods) {
+//            if ("freeStorageAndNotify".equals(method.getName())) {
+//                try {
+//                    method.invoke(pm, Long.MAX_VALUE, new ClearCacheObj());
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//                return;
+//            }
+//        }
+
+        try {
+            PackageManager packageManager = context.getPackageManager();
+            Method localMethod = packageManager.getClass().getMethod("freeStorageAndNotify", Long.TYPE,
+                    IPackageDataObserver.class);
+            Long localLong = Long.valueOf(getEnvironmentSize() - 1L);
+            Object[] arrayOfObject = new Object[2];
+            arrayOfObject[0] = localLong;
+            localMethod.invoke(packageManager, localLong, new IPackageDataObserver.Stub() {
+
+                @Override
+                public void onRemoveCompleted(String packageName, boolean succeeded) throws RemoteException {
+                    System.out.println("onRemoveCompleted packageName=="+succeeded);
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("cleanAll.......=="+e.toString());
+        }
+    }
+
+    private static long getEnvironmentSize() {
+        File localFile = Environment.getDataDirectory();
+        long l1;
+        if (localFile == null)
+            l1 = 0L;
+        while (true) {
+            String str = localFile.getPath();
+            StatFs localStatFs = new StatFs(str);
+            long l2 = localStatFs.getBlockSize();
+            l1 = localStatFs.getBlockCount() * l2;
+            return l1;
+        }
+
+    }
+
+    private void getCaches() {
+        // scan
+        pm = context.getPackageManager();
+        List<PackageInfo> packages = pm.getInstalledPackages(0);
+
+        for (PackageInfo pinfo : packages) {
+            String packageName = pinfo.packageName;
+            try {
+                Method getPackageSizeInfo = PackageManager.class
+                        .getDeclaredMethod("getPackageSizeInfo", String.class, IPackageStatsObserver.class);
+                getPackageSizeInfo.invoke(pm, packageName, new MyPackageStateObserver());
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("error===" + e.getMessage());
+            }
+
+        }
+
+
+    }
+
     @Override
     public void onStart() {
         super.onStart();
-        System.out.println(TAG + "onStart");
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        System.out.println(TAG + "onResume");
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        System.out.println(TAG + "onPause");
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        System.out.println(TAG + "onStop");
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        System.out.println(TAG + "onDestroyView");
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        System.out.println(TAG + "onDetach");
     }
 
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        System.out.println(TAG + "onDestroy");
     }
 
 

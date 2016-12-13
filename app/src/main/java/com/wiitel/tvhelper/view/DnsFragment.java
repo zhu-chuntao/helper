@@ -3,11 +3,17 @@ package com.wiitel.tvhelper.view;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.wiitel.tvhelper.R;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * Created by zhuchuntao on 16-12-8.
@@ -18,69 +24,88 @@ public class DnsFragment extends Fragment {
 
     private static final String TAG = DnsFragment.class.getName();
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        System.out.println(TAG+"onAttach");
-    }
+    private Context context;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        System.out.println(TAG+"onCreate");
+        this.context = getActivity();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        System.out.println(TAG+"onCreateView");
         return inflater.inflate(R.layout.dns_layout, null);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        System.out.println(TAG+"onActivityCreated");
+        Settings.System.putString(context.getContentResolver(), android.provider.Settings.System.WIFI_USE_STATIC_IP, "0");
+        Settings.System.putString(context.getContentResolver(), android.provider.Settings.System.WIFI_STATIC_DNS1, "192.168.0.2");
+        String statdns1 = android.provider.Settings.System.WIFI_STATIC_DNS1;
+        String statdns2 = android.provider.Settings.System.WIFI_STATIC_DNS2;
+        String sgateway = android.provider.Settings.System.WIFI_STATIC_GATEWAY;
+        String staticip = android.provider.Settings.System.WIFI_STATIC_IP;
+        String snetmask = android.provider.Settings.System.WIFI_STATIC_NETMASK;
+        String staticus = android.provider.Settings.System.WIFI_USE_STATIC_IP;
+        System.out.println("statdns1===" + statdns1 + ";statdns2==" + statdns2 + ";sgateway==" + sgateway + ";staticip=" + staticip + ";snetmask=" + snetmask + ";staticus=" + staticus);
+
+
+    }
+
+    private String getDns() {
+        try {
+            Process localProcess = Runtime.getRuntime().exec("getprop net.dns1");
+            String con = "";
+            String result = "";
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(localProcess.getInputStream()));
+            while ((result = br.readLine()) != null) {
+                con += result;
+            }
+            System.out.println("jsjsjsjs====" + localProcess.toString() + ";" + con.toString());
+
+            return con;
+
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            return "";
+        }
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        System.out.println(TAG+"onStart");
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        System.out.println(TAG+"onResume");
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        System.out.println(TAG+"onPause");
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        System.out.println(TAG+"onStop");
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        System.out.println(TAG+"onDestroyView");
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        System.out.println(TAG+"onDetach");
     }
 
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        System.out.println(TAG+"onDestroy");
-    }}
+    }
+}

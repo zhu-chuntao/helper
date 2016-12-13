@@ -2,6 +2,7 @@ package com.wiitel.tvhelper.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -75,6 +76,17 @@ public class TimePatternUtil {
 
     public static String getDate(long dateStr, TimePattern pattern) throws ParseException {
         return getSdf(pattern.getPattern()).format(dateStr);
+    }
+
+    /**
+     * 获取当前时间的前month月
+     * @param month
+     * @return
+     */
+    public static String getLastMonth(int month){
+        Calendar cal  = Calendar.getInstance();
+        cal.add(Calendar.MONTH, -month);
+        return getSdf(TimePattern.YM.pattern).format(cal.getTime());
     }
 
 

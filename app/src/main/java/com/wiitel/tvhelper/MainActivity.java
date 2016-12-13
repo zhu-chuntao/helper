@@ -14,6 +14,8 @@ import android.os.RemoteException;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -22,6 +24,9 @@ import com.wiitel.tvhelper.view.DnsFragment;
 import com.wiitel.tvhelper.view.FlowFragment;
 import com.wiitel.tvhelper.view.NetSpeedFragment;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -43,6 +48,10 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        // 隐藏状态栏
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         ClearFragment f1 = new ClearFragment();
@@ -74,8 +83,8 @@ public class MainActivity extends Activity {
 
     private void showClear() {
         System.out.println("showClear");
-        Fragment t=getFragmentManager().findFragmentById(R.id.main_fragment);
-        if(t instanceof ClearFragment){
+        Fragment t = getFragmentManager().findFragmentById(R.id.main_fragment);
+        if (t instanceof ClearFragment) {
             return;
         }
         ClearFragment f1 = new ClearFragment();
@@ -86,8 +95,8 @@ public class MainActivity extends Activity {
     }
 
     private void showNetSpeed() {
-        Fragment t=getFragmentManager().findFragmentById(R.id.main_fragment);
-        if(t instanceof NetSpeedFragment){
+        Fragment t = getFragmentManager().findFragmentById(R.id.main_fragment);
+        if (t instanceof NetSpeedFragment) {
             return;
         }
         NetSpeedFragment f1 = new NetSpeedFragment();
@@ -98,8 +107,8 @@ public class MainActivity extends Activity {
     }
 
     private void showFlow() {
-        Fragment t=getFragmentManager().findFragmentById(R.id.main_fragment);
-        if(t instanceof FlowFragment){
+        Fragment t = getFragmentManager().findFragmentById(R.id.main_fragment);
+        if (t instanceof FlowFragment) {
             return;
         }
         FlowFragment f1 = new FlowFragment();
@@ -111,8 +120,8 @@ public class MainActivity extends Activity {
 
 
     private void showDns() {
-        Fragment t=getFragmentManager().findFragmentById(R.id.main_fragment);
-        if(t instanceof DnsFragment){
+        Fragment t = getFragmentManager().findFragmentById(R.id.main_fragment);
+        if (t instanceof DnsFragment) {
             return;
         }
         DnsFragment f1 = new DnsFragment();
@@ -123,110 +132,28 @@ public class MainActivity extends Activity {
     }
 
 
-
-
-
-    private PackageManager pm;
-    StringBuilder sb = new StringBuilder();
-    StringBuilder sbCache = new StringBuilder();
-
-    private long cacheS;
-    Handler mHadler = new Handler();
-
-
-    class MyPackageStateObserver extends IPackageStatsObserver.Stub {
-
-        @Override
-        public void onGetStatsCompleted(PackageStats pStats, boolean succeeded) throws RemoteException {
-            String packageName = pStats.packageName;
-            long cacheSize = pStats.cacheSize;
-            long codeSize = pStats.codeSize;
-            long dataSize = pStats.dataSize;
-            cacheS += cacheSize;
-//            sb.delete(0, sb.length());
-            if (cacheSize > 0) {
-                sb.append("packageName = " + packageName + "\n")
-                        .append("   cacheSize: " + cacheSize + "\n")
-                        .append("   dataSize: " + dataSize + "\n")
-                        .append("-----------------------\n")
-                ;
-
-                Log.e("aaaa", sb.toString());
+    @Deprecated
+    private String android_command() {
+        //要执行的命令行
+        //String ret = "iptables --help";
+        String ret = "ndc resolver";
+        String con = "";
+        String result = "";
+        Process p;
+        try {
+            p = Runtime.getRuntime().exec(ret);
+            BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            while ((result = br.readLine()) != null) {
+                con += result;
             }
-
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
-    }
-
-
-    class ClearCacheObj extends IPackageDataObserver.Stub {
-
-        @Override
-        public void onRemoveCompleted(String packageName, final boolean succeeded) throws RemoteException {
-            mHadler.post(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(getApplicationContext(), "清楚状态： " + succeeded, Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-    }
-
-    /**
-     * 清理全部应用程序缓存的点击事件
-     *
-     * @param view
-     */
-    public void cleanAll(View view) {
-        //freeStorageAndNotify
-        Method[] methods = PackageManager.class.getMethods();
-        for (Method method : methods) {
-            if ("freeStorageAndNotify".equals(method.getName())) {
-                try {
-                    method.invoke(pm, Long.MAX_VALUE, new ClearCacheObj());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                return;
-            }
-        }
-    }
-
-    private void getCaches() {
-        // scan
-        pm = getPackageManager();
-        List<PackageInfo> packages = pm.getInstalledPackages(0);
-
-        int max = packages.size();
-        int current = 0;
-        sb.delete(0, sb.length());
-        sb.append("所有已安装的app信息：\n");
-        sb.append("所有App 总和：" + max + " \n");
-        //tvShowCaches.setText(sb.toString());
-        for (PackageInfo pinfo : packages) {
-            String packageName = pinfo.packageName;
-            try {
-
-                Method getPackageSizeInfo = PackageManager.class
-                        .getDeclaredMethod("getPackageSizeInfo", String.class, IPackageStatsObserver.class);
-                getPackageSizeInfo.invoke(pm, packageName, new MyPackageStateObserver());
-                current++;
-            } catch (Exception e) {
-                current++;
-                e.printStackTrace();
-            }
-
-        }
-        //===到这里，数据准备完成
-        mHadler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getApplicationContext(), "缓存信息获取完成", Toast.LENGTH_SHORT).show();
-                sbCache.append(Formatter.formatFileSize(getApplicationContext(), cacheS) + "\n");
-                //tvShowCaches.setText(sb.toString());
-                //tvAppCache.setText(sbCache.toString());
-                sbCache.delete(0, sbCache.length());
-            }
-        }, 1000);
-        //ok,所有应用程序信息显示完成
+        //可以打出命令执行的结果
+        System.out.println("==========================con:" + con);
+        //ret = do_command(con);
+        System.out.println("==========================ret:" + ret);
+        return ret;
     }
 }

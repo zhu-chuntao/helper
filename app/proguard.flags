@@ -10,33 +10,12 @@
     native <methods>;
 }
 
+-keep class android.content.pm.** { *;}
+
 -keepattributes Exceptions,InnerClasses,Signature,Deprecated,*Annotation*,Synthetic,EnclosingMethod,SourceFile,LineNumberTable
 
-################### region for xUtils
--keep public class org.xutils.** {
-    public protected *;
-}
--keep public interface org.xutils.** {
-    public protected *;
-}
--keepclassmembers class * extends org.xutils.** {
-    public protected *;
-}
--keepclassmembers class * extends org.xutils.http.RequestParams {*;}
--keepclassmembers class * {
-   void *(android.view.View);
-   *** *Click(...);
-   *** *Event(...);
-}
-#################### end region
 
 
-#################### android-Ultra-Pull-To-Refresh  start
--keep class in.srain.**
-#################### android-Ultra-Pull-To-Refresh end
-
-
-#for wallet
 
 #不混淆自定义view以及view group
 -keepclasseswithmembernames class * {
@@ -46,8 +25,6 @@
 -keepclasseswithmembernames class * {
     public <init>(android.content.Context, android.util.AttributeSet, int);
 }
-
-
 
 
 #不混淆android　support包v4
@@ -62,7 +39,7 @@
 -dontnote android.support.v7.**
 
 
-
+#对greeddao的混淆器
 -keepclassmembers class * extends org.greenrobot.greendao.AbstractDao {
 public static java.lang.String TABLENAME;
 }
@@ -72,3 +49,20 @@ public static java.lang.String TABLENAME;
 -dontwarn org.greenrobot.greendao.database.**
 # If you do not use Rx:
 -dontwarn rx.**
+
+#对butterknife的混淆器
+-keep class butterknife.** { *; }
+-dontwarn butterknife.internal.**
+-keep class **$$ViewBinder { *; }
+
+-keepclasseswithmembernames class * {
+    @butterknife.* <fields>;
+}
+
+-keepclasseswithmembernames class * {
+    @butterknife.* <methods>;
+}
+
+#
+-keep class **$MyPackageStateObserver
+-keep class **$ClearCacheObj
